@@ -13,12 +13,18 @@ class PageResult(BaseModel, Generic[T]):
     total: int
     page: int = 1
     size: int = 20
+    # 空页语义码：NO_RECORD=合法请求但无匹配记录；PAGE_OUT_OF_RANGE=页码超出范围。
+    # 非法分页参数不会走到这里，而是直接返回 400。
+    empty_code: str = ""
+    message: str = ""
 
 
 class ActionResult(BaseModel):
     ok: bool
     message: str
     entry: dict[str, Any] | None = None
+    # 检测类动作会同时返回质量回执，供前端复盘每轮结论
+    receipt: dict[str, Any] | None = None
 
 
 class EntryPayload(BaseModel):
@@ -26,6 +32,16 @@ class EntryPayload(BaseModel):
 
     values: dict[str, Any] = Field(default_factory=dict)
     remark: str | None = None
+
+
+class DetectionPayload(BaseModel):
+    """触发一轮质量检测时提交的结论与原因。
+
+    result 仅支持 成功 / 失败 / 中断；失败和中断必须说明原因。
+    """
+
+    result: str
+    reason: str = ""
 
 
 
